@@ -30,13 +30,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
 public class PeopleListFragment extends Fragment {
 	
 	private ListView _timedElementListView;
-
+	private Button _chronoStopButton;
 
 	@Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -46,6 +47,22 @@ public class PeopleListFragment extends Fragment {
     
     @Override
 	public void onViewCreated(View view, Bundle savedInstanceState) {
+    	_chronoStopButton = (Button)view.findViewById(R.id.chronoStopButton);
+    	_chronoStopButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				int count = _timedElementListView.getCount();
+				for (int i=0; i < count; i++) {
+					/* The list is not supposed to have more than 20 elements, so
+					 * keeping a set of "running chronos" instead of browsing the
+					 * whole list seems an overhead.	 */
+					TimedElement timedElement = (TimedElement)_timedElementListView.getItemAtPosition(i);
+					if (timedElement.getChrono().isRunning()) {
+						timedElement.getChrono().stop();
+					}
+				}
+			}
+		});
     	_timedElementListView = (ListView) view.findViewById(R.id.peopleListView);
     	_timedElementListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override
