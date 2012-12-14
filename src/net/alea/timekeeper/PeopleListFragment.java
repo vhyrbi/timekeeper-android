@@ -24,6 +24,7 @@ import net.alea.timekeeper.model.Chrono;
 import net.alea.timekeeper.model.TimedElement;
 import android.app.Fragment;
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -130,14 +131,23 @@ public class PeopleListFragment extends Fragment {
 		}
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
-			// TODO Dummy view, to replace with final view
-			TextView textView = (TextView)convertView;
-			if (textView == null) {
-				textView = new TextView(getContext());
-			}
 			TimedElement timedElement = this.getItem(position);
-			textView.setText(timedElement.getName() + " " + timedElement.getChrono().getElapsedTimeMillis());
-			return textView;
+			View timedElementView = convertView;
+			if (timedElementView == null) {
+				LayoutInflater inflater =  (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				timedElementView = inflater.inflate(R.layout.timed_element_view, parent, false);
+			}
+			final TextView nameTextView = (TextView)timedElementView.findViewById(R.id.nameLabel);
+			nameTextView.setText(timedElement.getName());
+			final TextView chronoTextView = (TextView)timedElementView.findViewById(R.id.chronoLabel);
+			chronoTextView.setText(Long.toString(timedElement.getChrono().getElapsedTimeMillis()));
+			if (timedElement.getChrono().isRunning()) {
+				timedElementView.setBackgroundColor(getResources().getColor(R.color.chrono_running));
+			}
+			else {
+				timedElementView.setBackgroundColor(Color.TRANSPARENT);
+			}
+			return timedElementView;
 		}	
 	}
     
