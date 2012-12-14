@@ -26,6 +26,7 @@ import net.alea.timekeeper.model.TimedElement;
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.WindowManager;
 
 
@@ -51,6 +52,25 @@ public class ChronoTriggerActivity extends Activity {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.activity_chrono_trigger, menu);
 		return true;
+	}
+	
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+	    switch (item.getItemId()) {
+	        case R.id.menu_multichrono:
+	        	if (item.isChecked()) {
+	        		item.setChecked(false);
+	        		_peopleListFragment.setMultiChrono(false);
+	        	}
+	            else {
+	            	item.setChecked(true);
+	        		_peopleListFragment.setMultiChrono(true);
+	            }
+	            return true;
+	        default:
+	            return super.onOptionsItemSelected(item);
+	    }
 	}
 	
 	

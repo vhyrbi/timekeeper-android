@@ -40,6 +40,7 @@ public class PeopleListFragment extends Fragment {
 	
 	private final static int GUI_REFRESH_RATE = 250; // in ms
 	
+	private boolean _multiChrono = false;
 	private ListView _timedElementListView;
 	private Button _chronoStopButton;
 
@@ -67,7 +68,7 @@ public class PeopleListFragment extends Fragment {
 	private void stopUIRefresh() {
 		_handler.removeCallbacks(_updateViewTask);
 	}
-	
+
 	
 	@Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -81,16 +82,7 @@ public class PeopleListFragment extends Fragment {
     	_chronoStopButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				int count = _timedElementListView.getCount();
-				for (int i=0; i < count; i++) {
-					/* The list is not supposed to have more than 20 elements, so
-					 * keeping a set of "running chronos" instead of browsing the
-					 * whole list seems an overhead.	 */
-					TimedElement timedElement = (TimedElement)_timedElementListView.getItemAtPosition(i);
-					if (timedElement.getChrono().isRunning()) {
-						timedElement.getChrono().stop();
-					}
-				}
+				stopAllChronos();
 				refreshUI();
 			}
 		});
@@ -101,9 +93,11 @@ public class PeopleListFragment extends Fragment {
 				TimedElement timedElement = (TimedElement)_timedElementListView.getAdapter().getItem(position);
 				Chrono chrono = timedElement.getChrono();
 				if (chrono.isRunning()) {
-					chrono.stop();
+					if (!_multiChrono) stopAllChronos(); // Not sure if keeping a set of running chronos worth it (list should have less than 15 elements)
+					else chrono.stop();
 				}
 				else {
+					if (!_multiChrono) stopAllChronos(); // Not sure if keeping a set of running chronos worth it (list should have less than 15 elements)
 					chrono.start();
 				}
 				refreshUI();
@@ -126,9 +120,25 @@ public class PeopleListFragment extends Fragment {
 	}
 
 
+	private void stopAllChronos() {
+		int count = _timedElementListView.getCount();
+		for (int i=0; i < count; i++) {
+			TimedElement timedElement = (TimedElement)_timedElementListView.getItemAtPosition(i);
+			if (timedElement.getChrono().isRunning()) {
+				timedElement.getChrono().stop();
+			}
+		}		
+	}
+	
+	
 	public void setTimedElementList(List<TimedElement> timedElements) {
 		_timedElementListView.setAdapter(new TimedElementViewAdapter(getActivity(), timedElements));
     }
+	
+	
+	public void setMultiChrono(boolean multi) {
+		_multiChrono = multi;
+	}
 	
 	
 	class TimedElementViewAdapter extends ArrayAdapter<TimedElement> {
