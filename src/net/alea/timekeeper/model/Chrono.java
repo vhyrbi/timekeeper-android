@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package net.alea.timekeeper.model;
 
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 
 public class Chrono {
 
@@ -64,10 +63,14 @@ public class Chrono {
 		return _elapsedTime;
 	}
 	
-	public Calendar getElapsedTime() {
-		Calendar calendar = new GregorianCalendar();
-		calendar.setTimeInMillis(getElapsedTimeMillis());
-		return calendar;
+	public int[] getElapsedTimeHourMinuteSecond() {
+		int[] result = new int[3];
+		long elapsedTime = getElapsedTimeMillis();
+		long elapsedTimeSeconds = elapsedTime / 1000;
+		result[0] = (int) (elapsedTimeSeconds / 3600);
+		result[1] = (int) ( (elapsedTimeSeconds % 3600) / 60 );
+		result[2] = (int) elapsedTimeSeconds % 60;
+		return result;
 	}
 	
 	private void flipChronoBase() {
@@ -75,5 +78,6 @@ public class Chrono {
 		_elapsedTime += newChronoBase - _chronoBase;
 		_chronoBase = newChronoBase;
 	}
+	
 	
 }

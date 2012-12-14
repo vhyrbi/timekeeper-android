@@ -137,10 +137,14 @@ public class PeopleListFragment extends Fragment {
 				LayoutInflater inflater =  (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 				timedElementView = inflater.inflate(R.layout.timed_element_view, parent, false);
 			}
+			// Build username
 			final TextView nameTextView = (TextView)timedElementView.findViewById(R.id.nameLabel);
 			nameTextView.setText(timedElement.getName());
+			// Build chrono text
 			final TextView chronoTextView = (TextView)timedElementView.findViewById(R.id.chronoLabel);
-			chronoTextView.setText(Long.toString(timedElement.getChrono().getElapsedTimeMillis()));
+			int[] time = timedElement.getChrono().getElapsedTimeHourMinuteSecond();
+			chronoTextView.setText(String.format("%02d:%02d:%02d", time[0], time[1], time[2]));
+			// Build background
 			if (timedElement.getChrono().isRunning()) {
 				timedElementView.setBackgroundColor(getResources().getColor(R.color.chrono_running));
 			}
