@@ -25,6 +25,7 @@ import net.alea.timekeeper.model.TimedElement;
 import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,9 +37,33 @@ import android.widget.TextView;
 
 public class PeopleListFragment extends Fragment {
 	
+	private final static int GUI_REFRESH_RATE = 250; // in ms
+	
 	private ListView _timedElementListView;
 	private Button _chronoStopButton;
 
+	private final Handler _handler = new Handler();
+	
+	
+	private final Runnable _updateViewTask = new Runnable() {
+		public void run() {
+			if (_timedElementListView != null) {
+				((TimedElementViewAdapter)_timedElementListView.getAdapter()).notifyDataSetChanged();
+			}
+			_handler.postDelayed(this, GUI_REFRESH_RATE);
+		}
+	};	
+	
+	private void startUIRefresh() {
+		_handler.removeCallbacks(_updateViewTask);
+		_handler.postDelayed(_updateViewTask, GUI_REFRESH_RATE);
+	}
+		
+	private void stopUIRefresh() {
+		_handler.removeCallbacks(_updateViewTask);
+	}
+	
+	
 	@Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_people_list, container, false);
@@ -79,11 +104,25 @@ public class PeopleListFragment extends Fragment {
 		});
 	}
 
+  
+	@Override
+	public void onResume() {
+		super.onResume();
+		startUIRefresh();
+	}
+	
+
+	@Override
+	public void onPause() {
+		super.onPause();
+		stopUIRefresh();
+	}
+
 
 	public void setTimedElementList(List<TimedElement> timedElements) {
 		_timedElementListView.setAdapter(new TimedElementViewAdapter(getActivity(), timedElements));
     }
-    
+	
 	
 	class TimedElementViewAdapter extends ArrayAdapter<TimedElement> {
 		public TimedElementViewAdapter(Context context, List<TimedElement> objects) {
