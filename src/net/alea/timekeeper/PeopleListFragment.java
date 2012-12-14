@@ -48,12 +48,16 @@ public class PeopleListFragment extends Fragment {
 	
 	private final Runnable _updateViewTask = new Runnable() {
 		public void run() {
-			if (_timedElementListView != null) {
-				((TimedElementViewAdapter)_timedElementListView.getAdapter()).notifyDataSetChanged();
-			}
+			refreshUI();
 			_handler.postDelayed(this, GUI_REFRESH_RATE);
 		}
 	};	
+	
+	private void refreshUI() {
+		if (_timedElementListView != null) {
+			((TimedElementViewAdapter)_timedElementListView.getAdapter()).notifyDataSetChanged();
+		}		
+	}
 	
 	private void startUIRefresh() {
 		_handler.removeCallbacks(_updateViewTask);
@@ -87,6 +91,7 @@ public class PeopleListFragment extends Fragment {
 						timedElement.getChrono().stop();
 					}
 				}
+				refreshUI();
 			}
 		});
     	_timedElementListView = (ListView) view.findViewById(R.id.peopleListView);
@@ -101,6 +106,7 @@ public class PeopleListFragment extends Fragment {
 				else {
 					chrono.start();
 				}
+				refreshUI();
 			}
 		});
 	}
