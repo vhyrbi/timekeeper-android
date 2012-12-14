@@ -26,6 +26,7 @@ import net.alea.timekeeper.model.TimedElement;
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.Menu;
+import android.view.WindowManager;
 
 
 public class ChronoTriggerActivity extends Activity {
@@ -38,6 +39,7 @@ public class ChronoTriggerActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_chrono_trigger);
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		_timedElements = createDummyData(); // TODO This is dummy data for test, replace with real code		
 		_peopleListFragment = (PeopleListFragment)getFragmentManager().findFragmentById(R.id.peopleListFragment);
 		_peopleListFragment.setTimedElementList(_timedElements);
