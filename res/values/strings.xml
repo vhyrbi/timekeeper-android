@@ -6,5 +6,6 @@
     <string name="btn_chrono_stop">Stop Chrono</string>
     <string name="dummy_username">User name</string>
     <string name="dummy_chrono">00:00:00</string>
+    <string name="btn_chrono_start">Start All</string>
 
 </resources>

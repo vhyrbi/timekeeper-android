@@ -43,6 +43,7 @@ public class PeopleListFragment extends Fragment {
 	private boolean _multiChrono = false;
 	private ListView _timedElementListView;
 	private Button _chronoStopButton;
+	private Button _chronoStartButton;
 
 	private final Handler _handler = new Handler();
 	
@@ -78,6 +79,14 @@ public class PeopleListFragment extends Fragment {
     
     @Override
 	public void onViewCreated(View view, Bundle savedInstanceState) {
+    	_chronoStartButton = (Button)view.findViewById(R.id.chronoStartButton);
+    	_chronoStartButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				startAllChronos();
+				refreshUI();
+			}
+		});
     	_chronoStopButton = (Button)view.findViewById(R.id.chronoStopButton);
     	_chronoStopButton.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -103,6 +112,8 @@ public class PeopleListFragment extends Fragment {
 				refreshUI();
 			}
 		});
+    	// At the end as it depends on the reference of _chronoStartButton
+    	setMultiChrono(false); 
 	}
 
   
@@ -117,6 +128,17 @@ public class PeopleListFragment extends Fragment {
 	public void onPause() {
 		super.onPause();
 		stopUIRefresh();
+	}
+	
+	
+	private void startAllChronos() {
+		int count = _timedElementListView.getCount();
+		for (int i=0; i < count; i++) {
+			TimedElement timedElement = (TimedElement)_timedElementListView.getItemAtPosition(i);
+			if (!timedElement.getChrono().isRunning()) {
+				timedElement.getChrono().start();
+			}
+		}			
 	}
 
 
@@ -138,6 +160,12 @@ public class PeopleListFragment extends Fragment {
 	
 	public void setMultiChrono(boolean multi) {
 		_multiChrono = multi;
+		if (_multiChrono) {
+			_chronoStartButton.setVisibility(View.VISIBLE);
+		}
+		else {
+			_chronoStartButton.setVisibility(View.GONE);			
+		}
 	}
 	
 	
