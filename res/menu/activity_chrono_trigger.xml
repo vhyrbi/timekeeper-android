@@ -4,5 +4,9 @@
         android:id="@+id/menu_multichrono"
         android:checkable="true"
         android:title="@string/menu_multichrono"/>
+    
+	<item
+        android:id="@+id/menu_reset"
+        android:title="@string/menu_reset"/>
 
 </menu>

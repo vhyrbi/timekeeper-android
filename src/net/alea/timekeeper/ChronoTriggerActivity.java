@@ -24,7 +24,12 @@ import java.util.List;
 import net.alea.timekeeper.model.Chrono;
 import net.alea.timekeeper.model.TimedElement;
 import android.os.Bundle;
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
+import android.content.DialogInterface;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
@@ -68,6 +73,10 @@ public class ChronoTriggerActivity extends Activity {
 	        		_peopleListFragment.setMultiChrono(true);
 	            }
 	            return true;
+	        case R.id.menu_reset:
+	        	ResetTimerDialogFragment resetDialog = new ResetTimerDialogFragment();
+	        	resetDialog.show(getFragmentManager(), "resetDialog");
+	        	return true;
 	        default:
 	            return super.onOptionsItemSelected(item);
 	    }
@@ -83,5 +92,29 @@ public class ChronoTriggerActivity extends Activity {
 		return data;
 	}
 
+	
+	@SuppressLint("ValidFragment")
+	private class ResetTimerDialogFragment extends DialogFragment {
+	    @Override
+	    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        	builder.setMessage(R.string.dlg_reset_message);
+            builder.setTitle(R.string.dlg_reset_title);
+            builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                   for(TimedElement timedElement : _timedElements) {
+                	   timedElement.getChrono().reset();
+                   }
+                }
+            });
+            builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    // Nothing to do
+                }
+            });
+            return builder.create();
+	    }
+	}
+	
 
 }

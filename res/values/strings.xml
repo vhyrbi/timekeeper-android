@@ -2,10 +2,17 @@
 <resources>
 
     <string name="app_name">TimeKeeper</string>
+    
     <string name="menu_multichrono">Enable multi chrono</string>
-    <string name="btn_chrono_stop">Stop Chrono</string>
+    <string name="menu_reset">Reset timers</string>
+    
     <string name="dummy_username">User name</string>
     <string name="dummy_chrono">00:00:00</string>
+    
+    <string name="btn_chrono_stop">Stop Chrono</string>
     <string name="btn_chrono_start">Start All</string>
-
+    
+    <string name="dlg_reset_title">Reset timers</string>
+    <string name="dlg_reset_message">Reset all timers to zero?</string>
+    
 </resources>
