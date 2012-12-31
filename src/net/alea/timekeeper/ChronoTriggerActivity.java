@@ -1,6 +1,6 @@
 /*
 TimeKeeper - Software to monitor how much time each person speaks
-Copyright (C) 2012 Vincent Hiribarren
+Copyright (C) 2012, 2013 Vincent Hiribarren
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
