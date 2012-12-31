@@ -33,6 +33,7 @@ import android.content.DialogInterface;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
+import android.widget.EditText;
 
 
 public class ChronoTriggerActivity extends Activity {
@@ -63,6 +64,10 @@ public class ChronoTriggerActivity extends Activity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 	    switch (item.getItemId()) {
+	    	case R.id.menu_add_chrono:
+	        	AddChronoDialogFragment addDialog = new AddChronoDialogFragment();
+	        	addDialog.show(getFragmentManager(), "addDialog");
+	    		return true;
 	        case R.id.menu_multichrono:
 	        	if (item.isChecked()) {
 	        		item.setChecked(false);
@@ -116,5 +121,32 @@ public class ChronoTriggerActivity extends Activity {
 	    }
 	}
 	
+	
+	@SuppressLint("ValidFragment")
+	private class AddChronoDialogFragment extends DialogFragment {
+	    @Override
+	    public Dialog onCreateDialog(Bundle savedInstanceState) {
+	    	final EditText newElementName = new EditText(getActivity());
+	    	newElementName.setHint(R.string.dlg_add_chrono_hint);
+        	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        	builder.setMessage(R.string.dlg_add_chrono_message);
+            builder.setTitle(R.string.dlg_add_chrono_title);
+            builder.setView(newElementName);
+            builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                	final CharSequence speakerName = newElementName.length() > 0 ?
+                			newElementName.getText() :
+                			getResources().getString(R.string.dlg_add_chrono_hint);
+                	_timedElements.add(new TimedElement(speakerName.toString(), new Chrono()));
+                }
+            });
+            builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    // Nothing to do
+                }
+            });
+            return builder.create();
+	    }		
+	}
 
 }

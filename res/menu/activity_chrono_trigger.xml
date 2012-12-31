@@ -1,5 +1,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
+	<item
+        android:id="@+id/menu_add_chrono"
+        android:icon="@drawable/ic_content_new"
+		android:showAsAction="always"
+        android:title="@string/menu_add_chrono"/>
+    
     <item
         android:id="@+id/menu_multichrono"
         android:checkable="true"
