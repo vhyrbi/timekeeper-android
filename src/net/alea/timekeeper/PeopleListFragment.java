@@ -27,8 +27,11 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
+import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.DragShadowBuilder;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -112,6 +115,14 @@ public class PeopleListFragment extends Fragment {
 				refreshUI();
 			}
 		});
+    	_timedElementListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+			@Override
+			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+				DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(view);
+				view.startDrag(null, shadowBuilder, _timedElementListView.getItemAtPosition(position), 0);
+				return true;
+			}
+		});
     	// At the end as it depends on the reference of _chronoStartButton
     	setMultiChrono(false); 
 	}
@@ -180,7 +191,11 @@ public class PeopleListFragment extends Fragment {
 			if (timedElementView == null) {
 				LayoutInflater inflater =  (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 				timedElementView = inflater.inflate(R.layout.timed_element_view, parent, false);
+				// Prepare drag and drop
+				timedElementView.setOnDragListener(new TimedElementDragListener());
 			}
+			// Associates view and position in ListAdapter, needed for drag and drop
+			timedElementView.setTag(R.id.item_position, position);
 			// Build username
 			final TextView nameTextView = (TextView)timedElementView.findViewById(R.id.nameLabel);
 			nameTextView.setText(timedElement.getName());
@@ -196,7 +211,48 @@ public class PeopleListFragment extends Fragment {
 				timedElementView.setBackgroundColor(Color.TRANSPARENT);
 			}
 			return timedElementView;
-		}	
+		}
+		private class TimedElementDragListener implements View.OnDragListener {
+			@Override
+			public boolean onDrag(View v, DragEvent event) {
+		        final int action = event.getAction();
+		        switch(action) {
+			        case DragEvent.ACTION_DRAG_STARTED:
+			        	if (event.getLocalState() instanceof TimedElement) {
+			                return true;
+			        	}
+			        	else {
+			        		return false;
+			        	}
+			        case DragEvent.ACTION_DRAG_ENTERED:
+			       		v.setBackgroundColor(Color.GREEN);
+		                v.invalidate();
+		                return true;
+			        case DragEvent.ACTION_DRAG_LOCATION:
+			        	int targetPosition = (Integer)v.getTag(R.id.item_position);
+			        	if (event.getY() < 	v.getHeight()/2 ) {
+			        		Log.i("test", "top "+targetPosition);   		
+			        	}
+			        	else {
+			        		Log.i("test", "bottom "+targetPosition);
+			        		
+			        	}
+			        	if (targetPosition > _timedElementListView.getLastVisiblePosition()-2) {
+			        		_timedElementListView.smoothScrollToPosition(targetPosition+2);
+			        	}
+			        	else if (targetPosition < _timedElementListView.getFirstVisiblePosition()+2) {
+			        		_timedElementListView.smoothScrollToPosition(targetPosition-2);
+			        	}
+			        	return true;
+			        case DragEvent.ACTION_DROP:
+			        case DragEvent.ACTION_DRAG_EXITED:
+			        case DragEvent.ACTION_DRAG_ENDED:
+			        default:
+			        	break;
+		        }
+				return false;
+			}		
+		}
 	}
     
 	
