@@ -41,9 +41,11 @@ import android.widget.TextView;
 
 public class PeopleListFragment extends Fragment {
 	
+	private final static String LOG_TAG = PeopleListFragment.class.getSimpleName();
 	private final static int GUI_REFRESH_RATE = 250; // in ms
 	
 	private boolean _multiChrono = false;
+	private DragState _dragState = new DragState();
 	private ListView _timedElementListView;
 	private Button _chronoStopButton;
 	private Button _chronoStartButton;
@@ -99,6 +101,7 @@ public class PeopleListFragment extends Fragment {
 			}
 		});
     	_timedElementListView = (ListView) view.findViewById(R.id.peopleListView);
+    	_timedElementListView.setOnDragListener(new TimedElementListViewDragListener());
     	_timedElementListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -166,7 +169,20 @@ public class PeopleListFragment extends Fragment {
 	
 	public void setTimedElementList(List<TimedElement> timedElements) {
 		_timedElementListView.setAdapter(new TimedElementViewAdapter(getActivity(), timedElements));
-    }
+		_timedElementListView.post(new Runnable() {
+			@Override
+			public void run() {
+				if (_timedElementListView.getCount() > _timedElementListView.getLastVisiblePosition() - _timedElementListView.getFirstVisiblePosition()) {
+
+					Log.i("app", "Create object for " +  _timedElementListView.getLastVisiblePosition());
+					_timedElementListView.getAdapter().getView(_timedElementListView.getLastVisiblePosition()+1, null, null);
+					_timedElementListView.getAdapter().getView(_timedElementListView.getLastVisiblePosition()+2, null, null);
+
+				}	
+			}
+		});
+
+   }
 	
 	
 	public void setMultiChrono(boolean multi) {
@@ -191,11 +207,9 @@ public class PeopleListFragment extends Fragment {
 			if (timedElementView == null) {
 				LayoutInflater inflater =  (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 				timedElementView = inflater.inflate(R.layout.timed_element_view, parent, false);
-				// Prepare drag and drop
-				timedElementView.setOnDragListener(new TimedElementDragListener());
 			}
 			// Associates view and position in ListAdapter, needed for drag and drop
-			timedElementView.setTag(R.id.item_position, position);
+			timedElementView.setId(position);
 			// Build username
 			final TextView nameTextView = (TextView)timedElementView.findViewById(R.id.nameLabel);
 			nameTextView.setText(timedElement.getName());
@@ -210,50 +224,70 @@ public class PeopleListFragment extends Fragment {
 			else {
 				timedElementView.setBackgroundColor(Color.TRANSPARENT);
 			}
+			if (_dragState.ongoingDrag && position == _dragState.position) {
+				timedElementView.setBackgroundColor(Color.YELLOW);
+			}
 			return timedElementView;
 		}
-		private class TimedElementDragListener implements View.OnDragListener {
-			@Override
-			public boolean onDrag(View v, DragEvent event) {
-		        final int action = event.getAction();
-		        switch(action) {
-			        case DragEvent.ACTION_DRAG_STARTED:
-			        	if (event.getLocalState() instanceof TimedElement) {
-			                return true;
-			        	}
-			        	else {
-			        		return false;
-			        	}
-			        case DragEvent.ACTION_DRAG_ENTERED:
-			       		v.setBackgroundColor(Color.GREEN);
-		                v.invalidate();
-		                return true;
-			        case DragEvent.ACTION_DRAG_LOCATION:
-			        	int targetPosition = (Integer)v.getTag(R.id.item_position);
-			        	if (event.getY() < 	v.getHeight()/2 ) {
-			        		Log.i("test", "top "+targetPosition);   		
-			        	}
-			        	else {
-			        		Log.i("test", "bottom "+targetPosition);
-			        		
-			        	}
-			        	if (targetPosition > _timedElementListView.getLastVisiblePosition()-2) {
-			        		_timedElementListView.smoothScrollToPosition(targetPosition+2);
-			        	}
-			        	else if (targetPosition < _timedElementListView.getFirstVisiblePosition()+2) {
-			        		_timedElementListView.smoothScrollToPosition(targetPosition-2);
-			        	}
-			        	return true;
-			        case DragEvent.ACTION_DROP:
-			        case DragEvent.ACTION_DRAG_EXITED:
-			        case DragEvent.ACTION_DRAG_ENDED:
-			        default:
-			        	break;
-		        }
-				return false;
-			}		
-		}
 	}
+	
+	
+	private static class DragState {
+		public enum Border { top, bottom, undefined };
+		public boolean ongoingDrag = false;
+		public int position = 0;
+		public Border border = Border.undefined;
+	}
+	
     
+	private class TimedElementListViewDragListener implements View.OnDragListener {
+		@Override
+		public boolean onDrag(View v, DragEvent event) {
+	        final int action = event.getAction();
+	        switch(action) {
+		        case DragEvent.ACTION_DRAG_STARTED:
+		        	if (event.getLocalState() instanceof TimedElement) {
+		                return true;
+		        	}
+		        	else {
+		        		return false;
+		        	}
+		        case DragEvent.ACTION_DRAG_ENTERED:
+		        	_dragState.ongoingDrag = true;
+	                return true;
+		        case DragEvent.ACTION_DRAG_LOCATION:
+		        	int targetPosition = _timedElementListView.pointToPosition((int)event.getX(), (int)event.getY());
+		        	View targetView = _timedElementListView.findViewById(targetPosition);
+		        	if (targetView == null) {
+		        		return true;
+		        	}
+		        	_dragState.position = targetPosition;
+		        	if (event.getY() < 	targetView.getHeight()/2 + targetView.getY()) {
+		        		Log.d(LOG_TAG, "Drag&Drop, top of position "+targetPosition);  
+		        		_dragState.border = DragState.Border.top; 		
+		        	}
+		        	else {
+		        		Log.d(LOG_TAG, "Drag&Drop, bottom of position "+targetPosition); 
+		        		_dragState.border = DragState.Border.bottom;
+		        	}
+		        	if (targetPosition > _timedElementListView.getLastVisiblePosition()-2) {
+		        		_timedElementListView.smoothScrollToPosition(targetPosition+2);
+		        	}
+		        	else if (targetPosition < _timedElementListView.getFirstVisiblePosition()+2) {
+		        		_timedElementListView.smoothScrollToPosition(targetPosition-2);
+		        	}
+		        	refreshUI();
+		        	return true;
+		        case DragEvent.ACTION_DROP:
+		        case DragEvent.ACTION_DRAG_EXITED:
+		        case DragEvent.ACTION_DRAG_ENDED:
+		        	_dragState.ongoingDrag = false;
+		        	return true;
+		        default:
+		        	break;
+	        }
+			return false;
+		}		
+	}
 	
 }
