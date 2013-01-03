@@ -54,6 +54,7 @@ public class PeopleListFragment extends Fragment {
 	
 	private boolean _multiChrono = false;
 	private DragState _dragState = new DragState();
+	private List<TimedElement> _timedElements;
 	private ListView _timedElementListView;
 	private Button _chronoStopButton;
 	private Button _chronoStartButton;
@@ -177,6 +178,7 @@ public class PeopleListFragment extends Fragment {
 	
 	
 	public void setTimedElementList(List<TimedElement> timedElements) {
+		_timedElements = timedElements;
 		_timedElementListView.setAdapter(new TimedElementViewAdapter(getActivity(), timedElements));
 		_timedElementListView.post(new Runnable() {
 			@Override
@@ -276,6 +278,7 @@ public class PeopleListFragment extends Fragment {
 	                return true;
 		        case DragEvent.ACTION_DRAG_LOCATION: {
 		        	if (targetView == null) {
+		        		// Not a problem, we will act on next drag location event
 		        		return true;
 		        	}  
 		        	updateDragState(event, targetPosition, targetView);
@@ -289,8 +292,27 @@ public class PeopleListFragment extends Fragment {
 		        	return true;
 		        }
 		        case DragEvent.ACTION_DROP: {
-		        	updateDragState(event, targetPosition, targetView);
+		        	if (targetView != null) {
+			        	updateDragState(event, targetPosition, targetView);        		
+		        	}
+		        	else {
+		        		// FIXME targetView should not be null, I had this error once, to check if happens again
+		        		Log.w(LOG_TAG, "Error, targetView is null, fallback code");
+		        		_dragState.targetPosition = targetPosition;
+		        		_dragState.border = DragState.Border.undefined;	        		
+		        	}
 		        	Log.d(LOG_TAG, "Drag&Drop, drop on top of "+targetPosition+" with view "+targetView); 
+		        	if (_dragState.targetPosition != _dragState.draggedPosition) {
+		        		final TimedElement draggedElement = _timedElements.remove(_dragState.draggedPosition);		        		
+		        		int finalPosition =  _dragState.targetPosition < _dragState.draggedPosition ?
+		        				_dragState.targetPosition :
+		        				_dragState.targetPosition - 1;
+		        		if (_dragState.border.equals(DragState.Border.bottom)) finalPosition++;
+		        		if (finalPosition < 0) finalPosition = 0;
+		        		if (finalPosition > _timedElements.size()-1) finalPosition = _timedElements.size() -1;
+		        		_timedElements.add(finalPosition, draggedElement);
+		        	}
+		        	refreshUI();
 		        	return true;
 		        }
 		        case DragEvent.ACTION_DRAG_EXITED:

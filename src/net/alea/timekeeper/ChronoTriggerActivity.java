@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package net.alea.timekeeper;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import net.alea.timekeeper.model.Chrono;
@@ -90,7 +90,7 @@ public class ChronoTriggerActivity extends Activity {
 	
 	// TODO This is dummy data for test, replace with real code
 	private List<TimedElement> createDummyData() {
-		final List<TimedElement> data = new ArrayList<TimedElement>();
+		final List<TimedElement> data = new LinkedList<TimedElement>();
 		for(int i=0; i < 40; i++) {
 			data.add(new TimedElement("User "+i, new Chrono()));
 		}
