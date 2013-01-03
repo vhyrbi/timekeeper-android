@@ -211,7 +211,7 @@ public class PeopleListFragment extends Fragment {
 		}
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
-			TimedElement timedElement = this.getItem(position);
+			final TimedElement timedElement = this.getItem(position);
 			View timedElementView = convertView;
 			if (timedElementView == null) {
 				LayoutInflater inflater =  (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -219,11 +219,19 @@ public class PeopleListFragment extends Fragment {
 			}
 			// Associates view and position in ListAdapter, needed for drag and drop
 			timedElementView.setId(position);
+			// Get views to fill
+			final TextView nameTextView = (TextView)timedElementView.findViewById(R.id.nameLabel);		
+			final TextView chronoTextView = (TextView)timedElementView.findViewById(R.id.chronoLabel);
+			// If element is currently dragged
+			if (_dragState.ongoingDrag && _dragState.draggedPosition == position) {
+				timedElementView.setBackgroundColor(getResources().getColor(android.R.color.background_dark));
+				nameTextView.setText("");
+				chronoTextView.setText("");
+				return timedElementView;
+			}		
 			// Build username
-			final TextView nameTextView = (TextView)timedElementView.findViewById(R.id.nameLabel);
 			nameTextView.setText(timedElement.getName());
 			// Build chrono text
-			final TextView chronoTextView = (TextView)timedElementView.findViewById(R.id.chronoLabel);
 			int[] time = timedElement.getChrono().getElapsedTimeHourMinuteSecond();
 			chronoTextView.setText(String.format("%02d:%02d:%02d", time[0], time[1], time[2]));
 			// Build background
@@ -264,6 +272,7 @@ public class PeopleListFragment extends Fragment {
 		        	else { return false; }
 		        case DragEvent.ACTION_DRAG_ENTERED:
 		        	_dragState.ongoingDrag = true;
+		        	refreshUI();
 	                return true;
 		        case DragEvent.ACTION_DRAG_LOCATION: {
 		        	if (targetView == null) {
