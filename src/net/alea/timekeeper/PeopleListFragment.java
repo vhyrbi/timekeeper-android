@@ -44,6 +44,14 @@ public class PeopleListFragment extends Fragment {
 	private final static String LOG_TAG = PeopleListFragment.class.getSimpleName();
 	private final static int GUI_REFRESH_RATE = 250; // in ms
 	
+	private static class DragState {
+		public enum Border {top, bottom, undefined};
+		public boolean ongoingDrag = false;
+		public int targetPosition = 0;
+		public int draggedPosition = 0;
+		public Border border = Border.undefined;
+	}
+	
 	private boolean _multiChrono = false;
 	private DragState _dragState = new DragState();
 	private ListView _timedElementListView;
@@ -121,6 +129,7 @@ public class PeopleListFragment extends Fragment {
     	_timedElementListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
 			@Override
 			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+				_dragState.draggedPosition = position;
 				DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(view);
 				view.startDrag(null, shadowBuilder, _timedElementListView.getItemAtPosition(position), 0);
 				return true;
@@ -196,7 +205,7 @@ public class PeopleListFragment extends Fragment {
 	}
 	
 	
-	class TimedElementViewAdapter extends ArrayAdapter<TimedElement> {
+	private class TimedElementViewAdapter extends ArrayAdapter<TimedElement> {
 		public TimedElementViewAdapter(Context context, List<TimedElement> objects) {
 			super(context, 0, objects);
 		}
@@ -224,52 +233,43 @@ public class PeopleListFragment extends Fragment {
 			else {
 				timedElementView.setBackgroundColor(Color.TRANSPARENT);
 			}
-			if (_dragState.ongoingDrag && position == _dragState.position) {
+			if (_dragState.ongoingDrag && position == _dragState.targetPosition) {
 				timedElementView.setBackgroundColor(Color.YELLOW);
 			}
 			return timedElementView;
 		}
 	}
 	
-	
-	private static class DragState {
-		public enum Border { top, bottom, undefined };
-		public boolean ongoingDrag = false;
-		public int position = 0;
-		public Border border = Border.undefined;
-	}
-	
     
 	private class TimedElementListViewDragListener implements View.OnDragListener {
+		private void updateDragState(DragEvent event, int targetPosition, View targetView) {
+        	_dragState.targetPosition = targetPosition;
+        	if (event.getY() < 	targetView.getHeight()/2 + targetView.getY()) {
+        		Log.d(LOG_TAG, "Drag&Drop, top of position "+targetPosition);  
+        		_dragState.border = DragState.Border.top;
+        	}
+        	else {
+        		Log.d(LOG_TAG, "Drag&Drop, bottom of position "+targetPosition); 
+        		_dragState.border = DragState.Border.bottom;
+        	}		
+		}
 		@Override
 		public boolean onDrag(View v, DragEvent event) {
 	        final int action = event.getAction();
+        	final int targetPosition = _timedElementListView.pointToPosition((int)event.getX(), (int)event.getY());
+        	final View targetView = _timedElementListView.findViewById(targetPosition);
 	        switch(action) {
 		        case DragEvent.ACTION_DRAG_STARTED:
-		        	if (event.getLocalState() instanceof TimedElement) {
-		                return true;
-		        	}
-		        	else {
-		        		return false;
-		        	}
+		        	if (event.getLocalState() instanceof TimedElement) { return true; }
+		        	else { return false; }
 		        case DragEvent.ACTION_DRAG_ENTERED:
 		        	_dragState.ongoingDrag = true;
 	                return true;
-		        case DragEvent.ACTION_DRAG_LOCATION:
-		        	int targetPosition = _timedElementListView.pointToPosition((int)event.getX(), (int)event.getY());
-		        	View targetView = _timedElementListView.findViewById(targetPosition);
+		        case DragEvent.ACTION_DRAG_LOCATION: {
 		        	if (targetView == null) {
 		        		return true;
-		        	}
-		        	_dragState.position = targetPosition;
-		        	if (event.getY() < 	targetView.getHeight()/2 + targetView.getY()) {
-		        		Log.d(LOG_TAG, "Drag&Drop, top of position "+targetPosition);  
-		        		_dragState.border = DragState.Border.top; 		
-		        	}
-		        	else {
-		        		Log.d(LOG_TAG, "Drag&Drop, bottom of position "+targetPosition); 
-		        		_dragState.border = DragState.Border.bottom;
-		        	}
+		        	}  
+		        	updateDragState(event, targetPosition, targetView);
 		        	if (targetPosition > _timedElementListView.getLastVisiblePosition()-2) {
 		        		_timedElementListView.smoothScrollToPosition(targetPosition+2);
 		        	}
@@ -278,7 +278,12 @@ public class PeopleListFragment extends Fragment {
 		        	}
 		        	refreshUI();
 		        	return true;
-		        case DragEvent.ACTION_DROP:
+		        }
+		        case DragEvent.ACTION_DROP: {
+		        	updateDragState(event, targetPosition, targetView);
+		        	Log.d(LOG_TAG, "Drag&Drop, drop on top of "+targetPosition+" with view "+targetView); 
+		        	return true;
+		        }
 		        case DragEvent.ACTION_DRAG_EXITED:
 		        case DragEvent.ACTION_DRAG_ENDED:
 		        	_dragState.ongoingDrag = false;
