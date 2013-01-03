@@ -231,7 +231,7 @@ public class PeopleListFragment extends Fragment {
 				timedElementView.setBackgroundColor(getResources().getColor(R.color.chrono_running));
 			}
 			else {
-				timedElementView.setBackgroundColor(Color.TRANSPARENT);
+				timedElementView.setBackgroundColor(getResources().getColor(android.R.color.background_light));
 			}
 			if (_dragState.ongoingDrag && position == _dragState.targetPosition) {
 				timedElementView.setBackgroundColor(Color.YELLOW);
