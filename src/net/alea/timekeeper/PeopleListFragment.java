@@ -42,7 +42,7 @@ import android.widget.TextView;
 public class PeopleListFragment extends Fragment {
 	
 	private final static String LOG_TAG = PeopleListFragment.class.getSimpleName();
-	private final static int GUI_REFRESH_RATE = 250; // in ms
+	private final static int GUI_REFRESH_RATE = 500; // in ms
 	
 	private static class DragState {
 		public enum Border {top, bottom, undefined};
@@ -71,7 +71,7 @@ public class PeopleListFragment extends Fragment {
 	
 	private void refreshUI() {
 		if (_timedElementListView != null) {
-			((TimedElementViewAdapter)_timedElementListView.getAdapter()).notifyDataSetChanged();
+			_timedElementListView.invalidateViews();
 		}		
 	}
 	
