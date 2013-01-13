@@ -30,12 +30,14 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.DragEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.DragShadowBuilder;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -127,15 +129,6 @@ public class PeopleListFragment extends Fragment {
 				refreshUI();
 			}
 		});
-    	_timedElementListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-			@Override
-			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-				_dragState.draggedPosition = position;
-				DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(view);
-				view.startDrag(null, shadowBuilder, _timedElementListView.getItemAtPosition(position), 0);
-				return true;
-			}
-		});
     	// At the end as it depends on the reference of _chronoStartButton
     	setMultiChrono(false); 
 	}
@@ -212,12 +205,23 @@ public class PeopleListFragment extends Fragment {
 			super(context, 0, objects);
 		}
 		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
+		public View getView(final int position, View convertView, ViewGroup parent) {
 			final TimedElement timedElement = this.getItem(position);
 			View timedElementView = convertView;
 			if (timedElementView == null) {
 				LayoutInflater inflater =  (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				timedElementView = inflater.inflate(R.layout.timed_element_view, parent, false);
+				final View newTimedElementView = inflater.inflate(R.layout.timed_element_view, parent, false);
+				final ImageView dragdropImage = (ImageView)newTimedElementView.findViewById(R.id.dragdropImage);
+				dragdropImage.setOnTouchListener(new View.OnTouchListener() {
+					@Override
+					public boolean onTouch(View view, MotionEvent event) {
+						_dragState.draggedPosition = position;
+						DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(newTimedElementView);
+						newTimedElementView.startDrag(null, shadowBuilder, _timedElementListView.getItemAtPosition(position), 0);
+						return true;
+					}
+				});
+				timedElementView = newTimedElementView;
 			}
 			// Associates view and position in ListAdapter, needed for drag and drop
 			timedElementView.setId(position);
