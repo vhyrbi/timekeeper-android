@@ -263,26 +263,28 @@ public class PeopleListFragment extends Fragment {
 			super(context, 0, objects);
 		}
 		@Override
-		public View getView(final int position, View convertView, ViewGroup parent) {
+		public View getView(int position, View convertView, ViewGroup parent) {
 			final TimedElement timedElement = this.getItem(position);
 			View timedElementView = convertView;
 			if (timedElementView == null) {
 				LayoutInflater inflater =  (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				final View newTimedElementView = inflater.inflate(R.layout.timed_element_view, parent, false);
-				final ImageView dragdropImage = (ImageView)newTimedElementView.findViewById(R.id.dragdropImage);
-				dragdropImage.setOnTouchListener(new View.OnTouchListener() {
-					@Override
-					public boolean onTouch(View view, MotionEvent event) {
-						_dragState.draggedPosition = position;
-						DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(newTimedElementView);
-						newTimedElementView.startDrag(null, shadowBuilder, _timedElementListView.getItemAtPosition(position), 0);
-						return true;
-					}
-				});
-				timedElementView = newTimedElementView;
+				timedElementView = inflater.inflate(R.layout.timed_element_view, parent, false);
 			}
 			// Associates view and position in ListAdapter, needed for drag and drop
 			timedElementView.setId(position);
+			// Prepare drag and drop icon
+			final View finalTimedElementView = timedElementView;
+			final ImageView dragdropImage = (ImageView)timedElementView.findViewById(R.id.dragdropImage);
+			dragdropImage.setOnTouchListener(new View.OnTouchListener() {
+				@Override
+				public boolean onTouch(View view, MotionEvent event) {
+					int position = finalTimedElementView.getId();
+					_dragState.draggedPosition = position;
+					DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(finalTimedElementView);
+					finalTimedElementView.startDrag(null, shadowBuilder, _timedElementListView.getItemAtPosition(position), 0);
+					return true;
+				}
+			});
 			// Get views to fill
 			final TextView nameTextView = (TextView)timedElementView.findViewById(R.id.nameLabel);		
 			final TextView chronoTextView = (TextView)timedElementView.findViewById(R.id.chronoLabel);
@@ -299,7 +301,6 @@ public class PeopleListFragment extends Fragment {
 			int[] time = timedElement.getChrono().getElapsedTimeHourMinuteSecond();
 			chronoTextView.setText(String.format("%02d:%02d:%02d", time[0], time[1], time[2]));
 			// If selection mode
-			final ImageView dragdropImage = (ImageView)timedElementView.findViewById(R.id.dragdropImage);
 			if (_timedElementListView.getCheckedItemCount() == 0) {
 				dragdropImage.setEnabled(true);				
 			}
