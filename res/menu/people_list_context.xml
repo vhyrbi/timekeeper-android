@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+    
+	<item
+        android:id="@+id/menu_content_edit"
+        android:icon="@drawable/ic_content_edit"
+		android:showAsAction="ifRoom"
+        android:title="@string/menu_content_edit"/>
+	
+	<item
+        android:id="@+id/menu_reset"
+        android:icon="@drawable/ic_chrono_reset"
+		android:showAsAction="ifRoom"
+        android:title="@string/menu_reset"/>
+	
+	<item
+        android:id="@+id/menu_content_remove"
+        android:icon="@drawable/ic_content_remove"
+		android:showAsAction="ifRoom"
+        android:title="@string/menu_content_remove"/>
+    
+</menu>

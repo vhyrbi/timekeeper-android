@@ -32,6 +32,7 @@ import android.view.ActionMode;
 import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -135,7 +136,8 @@ public class PeopleListFragment extends Fragment {
 		});
     	_timedElementListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
     	_timedElementListView.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {			
-			@Override
+			private MenuItem editMenuItem;
+    		@Override
 			public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
 				return false;
 			}
@@ -144,6 +146,9 @@ public class PeopleListFragment extends Fragment {
 			}	
 			@Override
 			public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+		        MenuInflater inflater = mode.getMenuInflater();
+		        inflater.inflate(R.menu.people_list_context, menu);
+		        editMenuItem = menu.findItem(R.id.menu_content_edit);
 				return true;
 			}
 			@Override
@@ -153,6 +158,14 @@ public class PeopleListFragment extends Fragment {
 			@Override
 			public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
 				mode.setTitle(""+_timedElementListView.getCheckedItemCount()+" selected");
+				if (_timedElementListView.getCheckedItemCount() == 1) {
+					editMenuItem.setVisible(true);
+					editMenuItem.setEnabled(true);
+				}
+				else {
+					editMenuItem.setVisible(false);
+					editMenuItem.setEnabled(false);					
+				}
 				refreshUI();
 			}
 		});
