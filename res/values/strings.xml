@@ -22,8 +22,14 @@
     <string name="dlg_content_remove_title">Remove timers</string>
     <string name="dlg_content_remove_message_partial">Delete selected timers?</string>
     
+    <string name="dlg_chrono_edit_title">Edit timer</string>
+    
     <string name="dlg_add_chrono_hint">New Speaker</string>
     <string name="dlg_add_chrono_message">Do you want to add a new speaker?</string>
     <string name="dlg_add_chrono_title">New speaker</string>
+    <string name="txt_name">Speaker</string>
+    <string name="txt_hours">Hours</string>
+    <string name="txt_minutes">Minutes</string>
+    <string name="txt_seconds">Seconds</string>
     
 </resources>

@@ -47,8 +47,10 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.NumberPicker;
 import android.widget.TextView;
 
 public class PeopleListFragment extends Fragment {
@@ -169,6 +171,15 @@ public class PeopleListFragment extends Fragment {
 		        	resetDialog.show(getFragmentManager(), "resetPartialDialog");
 					return true;
 				case R.id.menu_content_edit:
+					forLabel:
+					for(int i=0; i< _timedElementListView.getCount(); i++) {
+						if (_timedElementListView.isItemChecked(i)) {
+							EditDialogFragment editDialog = new EditDialogFragment(mode, (TimedElement) _timedElementListView.getItemAtPosition(i));
+							editDialog.show(getFragmentManager(), "editDialog");
+							break forLabel;
+						}
+					}
+					return true;
 				default:
 					return false;
 				}
@@ -470,6 +481,55 @@ public class PeopleListFragment extends Fragment {
             });
             return builder.create();
 	    }
+	}
+
+
+	@SuppressLint("ValidFragment")
+	private class EditDialogFragment extends DialogFragment {
+		private ActionMode _actionMode;
+		private TimedElement _timedElement;
+		public EditDialogFragment(ActionMode actionMode, TimedElement timedElement) {
+			_actionMode = actionMode;
+			_timedElement = timedElement;
+		}
+		@Override
+		public Dialog onCreateDialog(Bundle savedInstanceState) {
+			int[] elapsedTime = _timedElement.getChrono().getElapsedTimeHourMinuteSecond();
+			final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+			final LayoutInflater inflater = getActivity().getLayoutInflater();
+			final View editView = inflater.inflate(R.layout.edit_dialog, null);
+			final EditText speakerEditText = (EditText)editView.findViewById(R.id.speakerEditText);
+			speakerEditText.setText(_timedElement.getName());
+			final NumberPicker hourPicker = (NumberPicker)editView.findViewById(R.id.hourPicker);
+			hourPicker.setMinValue(0);
+			hourPicker.setMaxValue(23);
+			hourPicker.setValue(elapsedTime[0]);
+			final NumberPicker minutePicker = (NumberPicker)editView.findViewById(R.id.minutePicker);
+			minutePicker.setMinValue(0);
+			minutePicker.setMaxValue(59);
+			minutePicker.setValue(elapsedTime[1]);
+			final NumberPicker secondPicker = (NumberPicker)editView.findViewById(R.id.secondPicker);
+			secondPicker.setMinValue(0);
+			secondPicker.setMaxValue(59);
+			secondPicker.setValue(elapsedTime[2]);		
+			builder.setTitle(R.string.dlg_chrono_edit_title);
+			builder.setView(editView);
+			builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int id) {
+					long elapsedMillis = 1000 * (3600*hourPicker.getValue() + 60* minutePicker.getValue() + secondPicker.getValue() );
+					_timedElement.getChrono().reset(elapsedMillis);
+					_timedElement.setName(speakerEditText.getText().toString());
+					_actionMode.finish();
+				}
+			});
+			builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					// Nothing to do
+				}
+			});      
+			return builder.create();
+		}
 	}
 	
 }

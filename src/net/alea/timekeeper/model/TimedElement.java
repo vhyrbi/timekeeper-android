@@ -20,7 +20,7 @@ package net.alea.timekeeper.model;
 
 public class TimedElement {
 
-	private final String _name;
+	private String _name;
 	private final Chrono _chrono;
 	
 	public TimedElement(String name, Chrono chrono) {
@@ -30,6 +30,10 @@ public class TimedElement {
 	
 	public String getName() {
 		return _name;
+	}
+	
+	public void setName(String name) {
+		_name = name;
 	}
 	
 	public Chrono getChrono() {
