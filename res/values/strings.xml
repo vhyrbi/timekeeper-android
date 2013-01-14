@@ -17,6 +17,7 @@
     
     <string name="dlg_reset_title">Reset timers</string>
     <string name="dlg_reset_message">Reset all timers to zero?</string>
+    <string name="dlg_reset_message_partial">Reset selected timers to zero?</string>
     
     <string name="dlg_add_chrono_hint">New Speaker</string>
     <string name="dlg_add_chrono_message">Do you want to add a new speaker?</string>

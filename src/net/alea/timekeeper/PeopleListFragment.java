@@ -22,8 +22,13 @@ import java.util.List;
 
 import net.alea.timekeeper.model.Chrono;
 import net.alea.timekeeper.model.TimedElement;
+import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.app.Fragment;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
@@ -153,7 +158,18 @@ public class PeopleListFragment extends Fragment {
 			}
 			@Override
 			public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-				return false;
+				switch (item.getItemId()) {
+				case R.id.menu_content_remove:
+					mode.finish(); // Action picked, so close the CAB
+					return true;
+				case R.id.menu_reset:
+		        	ChronoResetDialogFragment resetDialog = new ChronoResetDialogFragment(mode);
+		        	resetDialog.show(getFragmentManager(), "resetDialog");
+					return true;
+				case R.id.menu_content_edit:
+				default:
+					return false;
+				}
 			}
 			@Override
 			public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
@@ -388,6 +404,37 @@ public class PeopleListFragment extends Fragment {
 	        }
 			return false;
 		}		
+	}
+	
+	
+	@SuppressLint("ValidFragment")
+	private class ChronoResetDialogFragment extends DialogFragment {
+		private ActionMode _actionMode;
+		public ChronoResetDialogFragment(ActionMode actionMode) {
+			_actionMode = actionMode;
+		}
+	    @Override
+	    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        	builder.setMessage(R.string.dlg_reset_message_partial);
+            builder.setTitle(R.string.dlg_reset_title);
+            builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                	for(int i=_timedElements.size()-1; i>=0; i--) {
+                		if (_timedElementListView.isItemChecked(i)) {
+                			_timedElements.get(i).getChrono().reset();
+                		}
+                	}
+                   _actionMode.finish();
+                }
+            });
+            builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    // Nothing to do
+                }
+            });
+            return builder.create();
+	    }
 	}
 	
 }
