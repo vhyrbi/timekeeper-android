@@ -3,8 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="50dp"
     android:orientation="horizontal"
-    android:paddingLeft="0dp"
-    android:paddingRight="15dp" >
+    android:paddingLeft="0dp" >
 
     <ImageView
         android:id="@+id/dragdropImage"
@@ -30,6 +29,7 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:gravity="right|center_vertical"
+        android:paddingRight="15dp"
         android:text="@string/dummy_chrono"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 

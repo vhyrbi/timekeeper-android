@@ -28,12 +28,16 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.ActionMode;
 import android.view.DragEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.DragShadowBuilder;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -126,6 +130,29 @@ public class PeopleListFragment extends Fragment {
 					if (!_multiChrono) stopAllChronos(); // Not sure if keeping a set of running chronos worth it (list should have less than 15 elements)
 					chrono.start();
 				}
+				refreshUI();
+			}
+		});
+    	_timedElementListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+    	_timedElementListView.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {			
+			@Override
+			public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+				return false;
+			}
+			@Override
+			public void onDestroyActionMode(ActionMode mode) {	
+			}	
+			@Override
+			public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+				return true;
+			}
+			@Override
+			public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+				return false;
+			}
+			@Override
+			public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
+				mode.setTitle(""+_timedElementListView.getCheckedItemCount()+" selected");
 				refreshUI();
 			}
 		});
@@ -240,16 +267,36 @@ public class PeopleListFragment extends Fragment {
 			// Build chrono text
 			int[] time = timedElement.getChrono().getElapsedTimeHourMinuteSecond();
 			chronoTextView.setText(String.format("%02d:%02d:%02d", time[0], time[1], time[2]));
-			// Build background
-			if (timedElement.getChrono().isRunning()) {
-				timedElementView.setBackgroundColor(getResources().getColor(R.color.chrono_running));
+			// If selection mode
+			final ImageView dragdropImage = (ImageView)timedElementView.findViewById(R.id.dragdropImage);
+			if (_timedElementListView.getCheckedItemCount() == 0) {
+				dragdropImage.setEnabled(true);				
 			}
 			else {
-				timedElementView.setBackgroundColor(getResources().getColor(android.R.color.background_light));
+				dragdropImage.setEnabled(false);				
 			}
+			// If ongoing drag and drop
 			if (_dragState.ongoingDrag && position == _dragState.targetPosition) {
 				timedElementView.setBackgroundColor(Color.YELLOW);
+				return timedElementView;
+			}			
+			// Build background
+			if(_timedElementListView.isItemChecked(position)) {
+				if(timedElement.getChrono().isRunning()) {
+					timedElementView.setBackgroundResource(R.drawable.item_selected_running);					
+				}
+				else {
+					timedElementView.setBackgroundResource(R.drawable.item_selected_normal);				
+				}
 			}
+			else {
+				if (timedElement.getChrono().isRunning()) {
+					timedElementView.setBackgroundColor(getResources().getColor(R.color.chrono_running));
+				}
+				else {
+					timedElementView.setBackgroundColor(getResources().getColor(android.R.color.background_light));
+				}
+			}			
 			return timedElementView;
 		}
 	}
