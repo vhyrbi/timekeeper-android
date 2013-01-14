@@ -147,7 +147,8 @@ public class PeopleListFragment extends Fragment {
 				return false;
 			}
 			@Override
-			public void onDestroyActionMode(ActionMode mode) {	
+			public void onDestroyActionMode(ActionMode mode) {
+				refreshUI();
 			}	
 			@Override
 			public boolean onCreateActionMode(ActionMode mode, Menu menu) {
@@ -160,11 +161,12 @@ public class PeopleListFragment extends Fragment {
 			public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
 				switch (item.getItemId()) {
 				case R.id.menu_content_remove:
-					mode.finish(); // Action picked, so close the CAB
+					ContentRemoveDialogFragment removeDialog = new ContentRemoveDialogFragment(mode);
+					removeDialog.show(getFragmentManager(), "removePartialDialog");
 					return true;
 				case R.id.menu_reset:
 		        	ChronoResetDialogFragment resetDialog = new ChronoResetDialogFragment(mode);
-		        	resetDialog.show(getFragmentManager(), "resetDialog");
+		        	resetDialog.show(getFragmentManager(), "resetPartialDialog");
 					return true;
 				case R.id.menu_content_edit:
 				default:
@@ -423,6 +425,38 @@ public class PeopleListFragment extends Fragment {
                 	for(int i=_timedElements.size()-1; i>=0; i--) {
                 		if (_timedElementListView.isItemChecked(i)) {
                 			_timedElements.get(i).getChrono().reset();
+                		}
+                	}
+                   _actionMode.finish();
+                }
+            });
+            builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    // Nothing to do
+                }
+            });
+            return builder.create();
+	    }
+	}
+	
+	
+	@SuppressLint("ValidFragment")
+	private class ContentRemoveDialogFragment extends DialogFragment {
+		private ActionMode _actionMode;
+		public ContentRemoveDialogFragment(ActionMode actionMode) {
+			_actionMode = actionMode;
+		}
+	    @Override
+	    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        	builder.setMessage(R.string.dlg_content_remove_message_partial);
+            builder.setTitle(R.string.dlg_content_remove_title);
+            builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                	// Reverse order as we delete on place
+                	for(int i=_timedElements.size()-1; i>=0; i--) {
+                		if (_timedElementListView.isItemChecked(i)) {
+                			_timedElements.remove(i);
                 		}
                 	}
                    _actionMode.finish();
