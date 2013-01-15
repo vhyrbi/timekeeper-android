@@ -51,6 +51,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.NumberPicker;
+import android.widget.NumberPicker.OnValueChangeListener;
 import android.widget.TextView;
 
 public class PeopleListFragment extends Fragment {
@@ -485,13 +486,18 @@ public class PeopleListFragment extends Fragment {
 
 
 	@SuppressLint("ValidFragment")
-	private class EditDialogFragment extends DialogFragment {
+	private class EditDialogFragment extends DialogFragment implements OnValueChangeListener {
 		private ActionMode _actionMode;
 		private TimedElement _timedElement;
+		private boolean _dirtyTime = false;
 		public EditDialogFragment(ActionMode actionMode, TimedElement timedElement) {
 			_actionMode = actionMode;
 			_timedElement = timedElement;
 		}
+		@Override
+		public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+			if (!_dirtyTime) _dirtyTime = true;
+		}		
 		@Override
 		public Dialog onCreateDialog(Bundle savedInstanceState) {
 			int[] elapsedTime = _timedElement.getChrono().getElapsedTimeHourMinuteSecond();
@@ -504,21 +510,26 @@ public class PeopleListFragment extends Fragment {
 			hourPicker.setMinValue(0);
 			hourPicker.setMaxValue(23);
 			hourPicker.setValue(elapsedTime[0]);
+			hourPicker.setOnValueChangedListener(this);
 			final NumberPicker minutePicker = (NumberPicker)editView.findViewById(R.id.minutePicker);
 			minutePicker.setMinValue(0);
 			minutePicker.setMaxValue(59);
 			minutePicker.setValue(elapsedTime[1]);
+			minutePicker.setOnValueChangedListener(this);
 			final NumberPicker secondPicker = (NumberPicker)editView.findViewById(R.id.secondPicker);
 			secondPicker.setMinValue(0);
 			secondPicker.setMaxValue(59);
-			secondPicker.setValue(elapsedTime[2]);		
+			secondPicker.setValue(elapsedTime[2]);
+			secondPicker.setOnValueChangedListener(this);
 			builder.setTitle(R.string.dlg_chrono_edit_title);
 			builder.setView(editView);
 			builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int id) {
-					long elapsedMillis = 1000 * (3600*hourPicker.getValue() + 60* minutePicker.getValue() + secondPicker.getValue() );
-					_timedElement.getChrono().reset(elapsedMillis);
+					if (_dirtyTime) {
+						long elapsedMillis = 1000 * (3600*hourPicker.getValue() + 60* minutePicker.getValue() + secondPicker.getValue() );
+						_timedElement.getChrono().reset(elapsedMillis);						
+					}
 					_timedElement.setName(speakerEditText.getText().toString());
 					_actionMode.finish();
 				}
