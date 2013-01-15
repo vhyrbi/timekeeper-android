@@ -499,7 +499,7 @@ public class PeopleListFragment extends Fragment {
 			final LayoutInflater inflater = getActivity().getLayoutInflater();
 			final View editView = inflater.inflate(R.layout.edit_dialog, null);
 			final EditText speakerEditText = (EditText)editView.findViewById(R.id.speakerEditText);
-			speakerEditText.setText(_timedElement.getName());
+			speakerEditText.append(_timedElement.getName());
 			final NumberPicker hourPicker = (NumberPicker)editView.findViewById(R.id.hourPicker);
 			hourPicker.setMinValue(0);
 			hourPicker.setMaxValue(23);
