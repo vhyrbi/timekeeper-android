@@ -243,19 +243,6 @@ public class PeopleListFragment extends Fragment {
 	public void setTimedElementList(List<TimedElement> timedElements) {
 		_timedElements = timedElements;
 		_timedElementListView.setAdapter(new TimedElementViewAdapter(getActivity(), timedElements));
-		_timedElementListView.post(new Runnable() {
-			@Override
-			public void run() {
-				if (_timedElementListView.getCount() > _timedElementListView.getLastVisiblePosition() - _timedElementListView.getFirstVisiblePosition()) {
-
-					Log.i("app", "Create object for " +  _timedElementListView.getLastVisiblePosition());
-					_timedElementListView.getAdapter().getView(_timedElementListView.getLastVisiblePosition()+1, null, null);
-					_timedElementListView.getAdapter().getView(_timedElementListView.getLastVisiblePosition()+2, null, null);
-
-				}	
-			}
-		});
-
    }
 	
 	
