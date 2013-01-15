@@ -47,7 +47,7 @@ public class ChronoTriggerActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_chrono_trigger);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-		_timedElements = createDummyData(); // TODO This is dummy data for test, replace with real code		
+		_timedElements =  new LinkedList<TimedElement>();
 		_peopleListFragment = (PeopleListFragment)getFragmentManager().findFragmentById(R.id.peopleListFragment);
 		_peopleListFragment.setTimedElementList(_timedElements);
 	}
@@ -85,16 +85,6 @@ public class ChronoTriggerActivity extends Activity {
 	        default:
 	            return super.onOptionsItemSelected(item);
 	    }
-	}
-	
-	
-	// TODO This is dummy data for test, replace with real code
-	private List<TimedElement> createDummyData() {
-		final List<TimedElement> data = new LinkedList<TimedElement>();
-		for(int i=0; i < 40; i++) {
-			data.add(new TimedElement("User "+i, new Chrono()));
-		}
-		return data;
 	}
 
 	
